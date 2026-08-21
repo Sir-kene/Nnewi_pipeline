@@ -1,77 +1,79 @@
-# Nnewi Watershed & Terrain Automation Pipeline
+# Multi-Criteria Automated Flood & Erosion Risk Modeling Pipeline
 
-An automated GIS processing pipeline built for QGIS using Python (`PyQGIS`). This project automates geospatial data standardization, terrain analysis, and hydrological modeling for the Nnewi region (Anambra State, Nigeria). It eliminates manual geoprocessing clicks by stringing together native QGIS algorithms and GRASS GIS processing tools into a structured, sequential workflow.
+An enterprise-grade, high-throughput spatial data engineering pipeline built with `PyQGIS` (QGIS Python API) and `GRASS GIS`. This automation engine accepts **any arbitrary Area of Interest (AOI)** and seamlessly ingests heterogeneous multi-source spatial data to dynamically model, analyze, and generate high-resolution **Flood Risk** and **Soil Erosion Vulnerability** maps.
 
-## 📌 Project Overview
-The pipeline processes raw Digital Elevation Models (DEM) and vector layers to delineate watersheds and extract terrain characteristics. It uses a custom **`QEventLoop` synchronous pause mechanism** that halts script execution mid-way, allowing the user to visually inspect an automatically loaded Flow Accumulation raster, click a specific pour point (outlet) directly on the QGIS canvas, and instantly resume the automated downstream analysis.
-
----
-
-## 🛠️ Pipeline Architecture & Execution Order
-
-The project is driven by a master orchestrator (`ALL_RUNNER.PY`) which cleans QGIS's internal memory cache using `importlib` and triggers the following sub-scripts sequentially:
-
-1. **`standardize.py`**: Reads raw datasets, handles multi-layer GeoPackage (`.gpkg`) boundary layers without throwing warnings, and clips inputs to the Nnewi study area.
-2. **`TERRAIN.py`**: 
-   - Fills sinks using `grass:r.fill.dir`.
-   - Computes slope maps using `native:slope`.
-   - Calculates accumulation and drainage structures via `grass:r.watershed`.
-   - Halts using a PyQt `QEventLoop` to accept a manual map canvas click event.
-   - Extracts localized watersheds using `grass:r.water.outlet` and renders results instantly.
-3. **`NDVI.py`**: Computes Normalized Difference Vegetation Index tracking from satellite imagery bands.
-4. **`Reclassify.py`**: Reclassifies raster layers into discrete environmental indicator metrics.
-5. **`Combine.py`**: Overlays and combines multi-criteria raster datasets.
-6. **`Finaling_output.py`**: Formats, styles, and exports final visualization maps.
+By eliminating manual desktop GIS mouse clicks, this pipeline converts complex multi-criteria evaluation workflows into a unified, reproducible headless data science engine.
 
 ---
 
-## 📁 Repository Structure
+## 🚀 Core Engine Capabilities
+
+- **Dynamic AOI Adaptation**: Automatically ingests multi-layer vector administrative layers (e.g., HDX HDN `nga_admin2`), handles internal layer indexing safely, clips all spatial assets to the chosen study zone, and handles datum/CRS projection alignment.
+- **Advanced Hydrological Extraction**: Leverages an interactive `QEventLoop` canvas click engine. It calculates flow routing paths, pauses execution for manual outlet verification on high-flux channels, and generates deterministic watershed catchments on the fly.
+- **Multi-Source Data Fusion**: Programmatically handles disparate, raw raster formats across various scales and spatial resolutions to compute physical indices:
+  - **Topographic Context**: Direct-derivation of localized surface slope and flow accumulation from raw Digital Elevation Models (DEM `.tiff`).
+  - **Vegetation Dynamics**: Autonomous band-math ingestion of Sentinel satellite assets (Band 4 and Band 8) to compute Normalized Difference Vegetation Index (NDVI) arrays.
+  - **Environmental Baselines**: Grid alignment and structural reclassification of global ESA Landcover data and high-resolution SoilGrids soil profile rasters.
+- **Automated Risk Analytical Outputs**: Automatically weights and overlays intersecting spatial factors to map dual critical hazards:
+  1. **Flood Risk Zoning**: Synthesizes slope profiles, land cover roughness, and watershed drainage accumulation networks.
+  2. **Erosion Vulnerability Matrix**: Combines terrain slope velocity vectors, NDVI vegetation shelter factors, and SoilGrids soil texture susceptibility.
+
+---
+
+## 🛠️ Automated Processing Architecture
+
+The entire project runs sequentially via a single orchestrator (`ALL_RUNNER.PY`), which clears QGIS memory caches via `importlib` and coordinates the modular script array:
+
+```text
+ALL_RUNNER.PY (Orchestration Engine)
+│
+├── 1. standardize.py       ──> Ingests boundary, clips, and standardizes CRS projections.
+├── 2. TERRAIN.py           ──> Resolves sinks, builds Slope/Flow networks, captures pour points.
+├── 3. NDVI.py              ──> Processes Sentinel B4/B8 rasters to generate vegetation index maps.
+├── 4. Reclassify.py        ──> Standardizes landcover, soil profiles, and slope into ordinal risk values.
+├── 5. Combine.py           ──> Multi-Criteria Evaluation (MCE) matrix overlay math.
+└── 6. Finaling_output.py   ──> Renders symbology layouts and outputs analytical risk maps.
+```
+
+---
+
+## 📁 Project Directory Structure
 
 ```text
 Nnewi_pipeline/
 │
-├── ALL_RUNNER.PY          # Master orchestrator script (Run this inside QGIS)
-├── CONFIG.py              # Global environment paths and file parameters
-├── standardize.py         # Data preprocessing and clipping
-├── TERRAIN.py             # Hydrological analysis & interactive map tool logic
-├── NDVI.py                # Vegetation index calculation script
-├── Reclassify.py          # Raster reclassification tool
-├── Combine.py             # Multi-layer overlay calculation
-├── Finaling_output.py     # Final map production and export engine
+├── ALL_RUNNER.PY          # Main pipeline compiler
+├── CONFIG.py              # Centralized environment environment variable routing
+├── standardize.py         # AOI clipping and vector layer handler
+├── TERRAIN.py             # Hydrological flow routing & interactive click callback
+├── NDVI.py                # Satellite band-math calculation script
+├── Reclassify.py          # Value normalization matrix engine
+├── Combine.py             # Flood/Erosion overlay algebra
+├── Finaling_output.py     # GeoTIFF output renderer
 │
-├── raw_data/              # Directory for raw input DEM, GPKG, and Sat imagery
-└── processed_data/        # Pipeline auto-generated geotiff results
+├── raw_data/              # Place raw files here (DEM, SoilGrids, Sentinel B4/B8, ESA Landcover, GPKG)
+└── processed_data/        # System auto-generated environmental metrics and Risk Maps
 ```
 
 ---
 
-## 🚀 How To Run This Project
+## 🏁 Input Data Specification
 
-### 1. Prerequisites
-- **QGIS 3.x** installed with **GRASS GIS** enabled in your Processing Provider settings.
-- Input data matching the file paths structured inside `CONFIG.py`.
+To execute the pipeline for your target AOI, place the following inputs inside the `raw_data/` folder and name them according to your `CONFIG.py` settings:
 
-### 2. Execution Steps
-1. Open **QGIS**.
-2. Open the **Python Console** (`Plugins` -> `Python Console` or `Ctrl + Alt + P`).
-3. Click the **Show Editor** icon to open the script panel.
-4. Open and load `ALL_RUNNER.PY`.
-5. Press the green **Run Script** button.
-
-### 3. Interactive Watershed Step
-When the script reaches **Step 2 (Terrain processing)**, execution will temporarily freeze, and a `flow_accumulation` raster layer will appear on your screen:
-1. Zoom into a high-value (bright white) pixel channel on your map canvas.
-2. Click your mouse directly over your target **outlet / pour point** on the map canvas.
-3. The pipeline will automatically capture your click coordinates, resume execution, run the watershed tool, load the `watershed_output` raster layer to your layers panel, and automatically proceed to run `NDVI.py` and the remaining pipeline tasks.
+| Input Dataset | Format | Core Analytical Purpose |
+| :--- | :--- | :--- |
+| **Digital Elevation Model** | `.tif` / `.tiff` | Slope velocity, flow routing, drainage patterns |
+| **Sentinel Imagery (B4 & B8)** | `.tif` / `.tiff` | Dense vegetation canopy calculation (NDVI) |
+| **SoilGrids Raster** | `.tif` / `.tiff` | Soil erodibility parameters (K-factor metrics) |
+| **ESA Landcover Map** | `.tif` / `.tiff` | Hydraulic roughness parameters and surface runoff retention |
+| **Admin Boundary (AOI)** | `.gpkg` / `.shp` | Dynamic study area clipping mask |
 
 ---
 
-## ⚙️ Configuration (`CONFIG.py`)
-All file routing utilizes absolute and relative system paths managed globally inside `CONFIG.py`. This ensures portability across different user local environments:
+## 💻 Running the Risk Pipeline
 
-```python
-BASE_DIR = r"C:\Users\HP\Desktop\QGIS_Learning\Nnewi_pipeline"
-RAW_DIR = os.path.join(BASE_DIR, "raw_data")
-PROC_DIR = os.path.join(BASE_DIR, "processed_data")
-# Additional automated output paths...
-```
+1. Open **QGIS** and open the Python Console (`Ctrl + Alt + P`).
+2. Load **`ALL_RUNNER.PY`** inside the script editor.
+3. Click **Run Script**.
+4. **Interactive Component**: When the `flow_accumulation` raster renders, zoom into your target stream channel and click the canvas to register your drainage outlet. The engine will catch the coordinates, delineate the watershed basin, and automatically run the remaining scripts to output your final **Flood and Erosion Risk GeoTIFFs**.
