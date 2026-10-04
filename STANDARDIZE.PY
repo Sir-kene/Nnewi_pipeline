@@ -1,8 +1,9 @@
-# standardize.py — corrected, single source of truth for the grid
+# standardize.py — production version, single source of truth for the grid
 import os
 import rasterio
 from rasterio.warp import calculate_default_transform, reproject, Resampling
 import geopandas as gpd
+import numpy as np
 import CONFIG
 
 def get_reference_grid():
@@ -16,18 +17,43 @@ def get_reference_grid():
     transform = rasterio.transform.from_origin(minx, maxy, res, res)
     return transform, width, height
 
+def _safe_nodata(src):
+    """Picks a nodata value that actually fits the raster's data type."""
+    if src.nodata is not None:
+        return src.nodata
+    dtype = src.dtypes[0]
+    if dtype.startswith('uint8'):
+        return 255
+    if dtype.startswith('uint16'):
+        return 0
+    if dtype.startswith('int16'):
+        return -9999
+    return -9999.0
+
 def standardize_raster(src_path, out_path, ref_transform, ref_width, ref_height,
                         dst_crs=CONFIG.TARGET_CRS):
     with rasterio.open(src_path) as src:
         os.makedirs(os.path.dirname(out_path), exist_ok=True)
         profile = src.profile.copy()
-        profile.update({'crs': dst_crs, 'transform': ref_transform,
-                         'width': ref_width, 'height': ref_height})
+        
+        # Hardened safety defaults: Isolate data types and establish single-band count rules
+        nodata_val = _safe_nodata(src)
+        profile.update({
+            'crs': dst_crs, 
+            'transform': ref_transform,
+            'width': ref_width, 
+            'height': ref_height,
+            'count': 1,           # Forces output to single-band structure
+            'nodata': nodata_val,  # Stops edge boundaries from converting to zero artifacts
+            'compress': 'lzw'     # Optimizes hard-drive file sizes
+        })
+        
         with rasterio.open(out_path, 'w', **profile) as dst:
             reproject(source=rasterio.band(src, 1), destination=rasterio.band(dst, 1),
                       src_transform=src.transform, src_crs=src.crs,
                       dst_transform=ref_transform, dst_crs=dst_crs,
-                      resampling=Resampling.bilinear)
+                      resampling=Resampling.bilinear,
+                      src_nodata=src.nodata, dst_nodata=nodata_val)
     print(f"Saved (on shared grid): {out_path}")
 
 def standardize_vector(src_path, out_path, dst_crs=CONFIG.TARGET_CRS):
@@ -48,8 +74,8 @@ def run():
     standardize_raster(CONFIG.WORLD_COVER_PATH, CONFIG.WORLDCOVER_STD_PATH, ref_transform, ref_width, ref_height)
     standardize_raster(CONFIG.SOIL_GRID_PATH, CONFIG.SOIL_STD_PATH, ref_transform, ref_width, ref_height)
 
-    standardize_vector(CONFIG.AOI_PATH, r"C:\Users\HP\Desktop\QGIS_Learning\Nnewi_pipeline\raw_data\Nnewi_N&S_AOI.gpkg")
-    standardize_vector(CONFIG.NNEWI_NORTH_AND_SOUTH_TRUE_BOUNDARY_PATH, r"C:\Users\HP\Desktop\QGIS_Learning\Nnewi_pipeline\raw_data\NNEWI_NORTH_AND_SOUTH_NGA_ADMIN2.gpkg")
+    standardize_vector(CONFIG.AOI_PATH, r"C:\Users\HP\Desktop\QGIS_Learning\Nnewi_pipeline\processed\Nnewi_N&S_AOI.gpkg")
+    standardize_vector(CONFIG.NNEWI_NORTH_AND_SOUTH_TRUE_BOUNDARY_PATH, r"C:\Users\HP\Desktop\QGIS_Learning\Nnewi_pipeline\processed\NNEWI_NORTH_AND_SOUTH_NGA_ADMIN2.gpkg")
     print("Standardization complete — every raster now shares one identical grid.")
 
 if __name__ == "__main__":

@@ -1,47 +1,58 @@
-# ---raw inputs (downloaded, clipped merged files) ---
-AOI_PATH = r"C:\Users\HP\Desktop\QGIS_Learning\Nnewi_pipeline\raw_data\Nnewi_N&S_AOI.gpkg" #Area of interest four cornered with buffer
-TRUE_BOUNDARY_PATH = r"C:\Users\HP\Desktop\QGIS_Learning\Nnewi_pipeline\raw_data\NNEWI_NORTH_AND_SOUTH_NGA_ADMIN2.gpkg" # precise area of interest
-DEM_RAW_PATH = r"C:\Users\HP\Desktop\QGIS_Learning\Nnewi_pipeline\raw_data\Nnewi_DEM_clipped.TIF" # clipped merged DEM of this AREA of interest size
-SENTINEL_NIR_PATH = r"C:\Users\HP\Desktop\QGIS_Learning\Nnewi_pipeline\raw_data\B8_10m.tif"    # clipped sentinel_2 image nir
-SENTINEL_RED_PATH = r"C:\Users\HP\Desktop\QGIS_Learning\Nnewi_pipeline\raw_data\B4_10m.tif"    # clipped sentinel_2 image red
-WORLD_COVER_PATH = r"C:\Users\HP\Desktop\QGIS_Learning\Nnewi_pipeline\raw_data\ESA_NnewiSth_n_Nth_10_N03E006_N06E006_merged_clip.tif" # clipped merged Worldcover
-SOIL_GRID_PATH = r"C:\Users\HP\Desktop\QGIS_Learning\Nnewi_pipeline\raw_data\soil_properties_clipped.tif" # clipped soil properties
+# CONFIG.py — single source of truth for the project paths and configurations
+import os
 
-# --- processed outputs ----
-DEM_STD_PATH = r"C:\Users\HP\Desktop\QGIS_Learning\Nnewi_pipeline\processed\dem_std.tif"
-NIR_STD_PATH = r"C:\Users\HP\Desktop\QGIS_Learning\Nnewi_pipeline\processed\nir_std.tif"
-RED_STD_PATH = r"C:\Users\HP\Desktop\QGIS_Learning\Nnewi_pipeline\processed\red_std.tif"
-WORLDCOVER_STD_PATH = r"C:\Users\HP\Desktop\QGIS_Learning\Nnewi_pipeline\processed\worldcover_std.tif"
-SOIL_STD_PATH = r"C:\Users\HP\Desktop\QGIS_Learning\Nnewi_pipeline\processed\soilgrids_std.tif"
-FLOW_DIR_PATH =  r"C:\Users\HP\Desktop\QGIS_Learning\Nnewi_pipeline\processed\flow_direction.tif"
-WATERSHED_PATH =  r"C:\Users\HP\Desktop\QGIS_Learning\Nnewi_pipeline\processed\watershed.tif"
+# Base directory for ease of configuration
+BASE_DIR = r"C:\Users\HP\Desktop\QGIS_Learning\Nnewi_pipeline"
+RAW_DIR = os.path.join(BASE_DIR, "raw_data")
+PROC_DIR = os.path.join(BASE_DIR, "processed")
+OUT_DIR = os.path.join(BASE_DIR, "output_files")
 
-DEM_FILLED_PATH = r"C:\Users\HP\Desktop\QGIS_Learning\Nnewi_pipeline\processed\dem_filled.tif"
-SLOPE_PATH = r"C:\Users\HP\Desktop\QGIS_Learning\Nnewi_pipeline\processed\slope.tif"
-FLOW_ACC_PATH = r"C:\Users\HP\Desktop\QGIS_Learning\Nnewi_pipeline\processed\flow_accumulation.tif"
-NDVI_PATH = r"C:\Users\HP\Desktop\QGIS_Learning\Nnewi_pipeline\processed\NDVI.tif"
+# Ensure core directories exist automatically
+for folder in [PROC_DIR, OUT_DIR]:
+    os.makedirs(folder, exist_ok=True)
 
+# --- raw inputs ---
+AOI_PATH = os.path.join(RAW_DIR, "Nnewi_N&S_AOI.gpkg")
+NNEWI_NORTH_AND_SOUTH_TRUE_BOUNDARY_PATH = os.path.join(RAW_DIR, "NNEWI_NORTH_AND_SOUTH_NGA_ADMIN2.gpkg")
+DEM_RAW_PATH = os.path.join(RAW_DIR, "Nnewi_DEM_clipped.TIF")
+SENTINEL_NIR_PATH = os.path.join(RAW_DIR, "B8_10m.tif")
+SENTINEL_RED_PATH = os.path.join(RAW_DIR, "B4_10m.tif")
+WORLD_COVER_PATH = os.path.join(RAW_DIR, "ESA_NnewiSth_n_Nth_10_N03E006_N06E006_merged_clip.tif")
+SOIL_GRID_PATH = os.path.join(RAW_DIR, "soil_properties_clipped.tif")
 
-SLOPE_SCORE_PATH = r"C:\Users\HP\Desktop\QGIS_Learning\Nnewi_pipeline\processed\slope_score.tif"
-FLOW_SCORE_PATH = r"C:\Users\HP\Desktop\QGIS_Learning\Nnewi_pipeline\processed\flow_score.tif"
-NDVI_SCORE_PATH = r"C:\Users\HP\Desktop\QGIS_Learning\Nnewi_pipeline\processed\ndvi_score.tif"
-SOIL_SCORE_PATH = r"C:\Users\HP\Desktop\QGIS_Learning\Nnewi_pipeline\processed\soil.tif"
+# --- processed intermediate outputs ---
+DEM_STD_PATH = os.path.join(PROC_DIR, "dem_std.tif")
+NIR_STD_PATH = os.path.join(PROC_DIR, "nir_std.tif")
+RED_STD_PATH = os.path.join(PROC_DIR, "red_std.tif")
+WORLDCOVER_STD_PATH = os.path.join(PROC_DIR, "worldcover_std.tif")
+SOIL_STD_PATH = os.path.join(PROC_DIR, "soilgrids_std.tif")
+FILL_DIRECTION_PATH = os.path.join(PROC_DIR, "flow_direction.tif")
 
-EROSION_RISK_PATH = r"C:\Users\HP\Desktop\QGIS_Learning\Nnewi_pipeline\processed\erosion_risk_raw.tif"
-FLOOD_RISK_PATH = r"C:\Users\HP\Desktop\QGIS_Learning\Nnewi_pipeline\processed\flood_risk_raw.tif"
+DEM_FILLED_PATH = os.path.join(PROC_DIR, "dem_filled.tif")
+SLOPE_PATH = os.path.join(PROC_DIR, "slope.tif")
+FLOW_DIR_PATH = os.path.join(PROC_DIR, "flow_direction.tif")
+FLOW_ACC_PATH = os.path.join(PROC_DIR, "flow_accumulation.tif")
+WATERSHED_PATH = os.path.join(PROC_DIR, "watershed.tif")
+NDVI_PATH = os.path.join(PROC_DIR, "NDVI.tif")
 
+SLOPE_SCORE_PATH = os.path.join(PROC_DIR, "slope_score.tif")
+FLOW_SCORE_PATH = os.path.join(PROC_DIR, "flow_score.tif")
+NDVI_SCORE_PATH = os.path.join(PROC_DIR, "ndvi_score.tif")
+SOIL_SCORE_PATH = os.path.join(PROC_DIR, "soil.tif")
 
+# --- final pipeline output files ---
+EROSION_FINAL_PATH = os.path.join(OUT_DIR, "erosion_risk_clipped.tif")
+EROSION_CLASSED_PATH = os.path.join(OUT_DIR, "erosion_risk_5class.tif")
+FLOOD_FINAL_PATH = os.path.join(OUT_DIR, "flood_risk_clipped.tif")
+FLOOD_CLASSED_PATH = os.path.join(OUT_DIR, "flood_risk_5class.tif")
 
-EROSION_FINAL_PATH = r"C:\Users\HP\Desktop\QGIS_Learning\Nnewi_pipeline\processed\erosion_risk_final.tif"
-FLOOD_FINAL_PATH = r"C:\Users\HP\Desktop\QGIS_Learning\Nnewi_pipeline\processed\flood_risk_final.tif"
+EROSION_RISK_PATH = os.path.join(OUT_DIR, "erosion_risk_final.tif")
+FLOOD_RISK_PATH = os.path.join(OUT_DIR, "flood_risk_final.tif")
 
+# --- spatial settings ---
+# EPSG:32632 is WGS 84 / UTM zone 32N (Perfect for Anambra State, Nigeria)
+TARGET_CRS = "EPSG:32632" 
+TARGET_RESOLUTION = 30  # Change to 10 if you want to match the raw Sentinel crispness
 
-EROSION_CLASSED_PATH = r"C:\Users\HP\Desktop\QGIS_Learning\Nnewi_pipeline\processed\erosion_risk_5class.tif"
-FLOOD_CLASSED_PATH = r"C:\Users\HP\Desktop\QGIS_Learning\Nnewi_pipeline\processed\flood_risk_5class.tif"
-
-
-# ---settings---
-TARGET_CRS = "EPSG:32632"
-TARGET_RESOLUTION	= 30
-
-WEIGHTS	=	{"slope" : 0.25, "flow" :	0.35, "ndvi" : 0.20, "soil" : 0.20}
+# --- MCDA Weights ---
+WEIGHTS = {"slope": 0.25, "flow": 0.35, "ndvi": 0.20, "soil": 0.20}
