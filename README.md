@@ -1,5 +1,3 @@
-Here is a condensed, high-impact version of your README. It cuts out the long explanations and isolates just the essential technical code metrics, folder paths, and execution instructions so it fits cleanly into your file repository slot.
-------------------------------
 ## Automated Spatial MCDA Pipeline for Flood & Erosion Risk Mapping
 An automated, production-grade geospatial data processing pipeline built in Python for QGIS (PyQGIS). This system ingests multi-source vector and satellite raster inputs, resolves spatial grid misalignments, dynamically reclassifies surface geomorphology based on regional flatness profiles, and executes a weighted overlay engine to map localized Flood and Erosion Hazard Risks within Nnewi North and South LGAs, Anambra State, Nigeria.
 ------------------------------
