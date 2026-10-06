@@ -109,7 +109,8 @@ Flood Risk — True Internal Area Breakdown:
   Moderate: 44.6%
   High: 31.9%
   Very High: 10.3%
-
-Pipeline complete — check your QGIS Layers Board to see your finished maps!
+  
+![Erosion Risk Map](outputs/erosion_risk_5img.png)
+![Flood Risk Map](outputs/flood_risk_5img.png)
 
 ------------------------------
